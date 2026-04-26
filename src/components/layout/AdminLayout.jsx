@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Home, LayoutGrid, Tag, ArrowDownToLine, ArrowUpToLine,
     Users, CalendarDays, Calculator, PieChart, ChevronLeft,
-    ChevronRight, Menu, X, LockKeyhole // <-- Đã thêm icon LockKeyhole
+    ChevronRight, Menu, X, LockKeyhole
 } from 'lucide-react';
 
 import Header from './Header';
@@ -54,9 +54,19 @@ export default function AdminLayout() {
         if (window.innerWidth < 768) setIsSidebarOpen(false);
     };
 
+    // ==========================================
+    // FIX LỖI KẸT SIDEBAR TRÊN MOBILE
+    // ==========================================
     useEffect(() => {
+        let lastWidth = window.innerWidth;
         const handleResize = () => {
-            setIsSidebarOpen(window.innerWidth >= 768);
+            const currentWidth = window.innerWidth;
+            // Chỉ chạy logic đóng mở khi chiều NGANG thực sự thay đổi
+            // (Phớt lờ việc cuộn trang làm đổi chiều cao trên điện thoại)
+            if (currentWidth !== lastWidth) {
+                setIsSidebarOpen(currentWidth >= 768);
+                lastWidth = currentWidth;
+            }
         };
 
         window.addEventListener('resize', handleResize);
@@ -98,25 +108,25 @@ export default function AdminLayout() {
             {/* Pattern */}
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* Overlay Mobile */}
+            {/* Overlay Mobile (Đã tối ưu để có thể chạm vào phần nền tối tắt menu) */}
             <AnimatePresence>
-                {isSidebarOpen && window.innerWidth < 768 && (
+                {isSidebarOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="md:hidden fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
+                        className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-[90] backdrop-blur-sm cursor-pointer"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
             {/* SIDEBAR */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
-                        ? 'translate-x-0 w-64'
+                        ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
                         : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
@@ -131,9 +141,11 @@ export default function AdminLayout() {
                     )}
                 </button>
 
+                {/* NÚT X ĐÓNG MENU (Đã fix lỗi bị Tai thỏ iPhone che khuất) */}
                 <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-50"
+                    className="md:hidden absolute right-4 z-50 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] shadow-lg"
+                    style={{ top: 'max(1.5rem, env(safe-area-inset-top, 1.5rem))' }}
                 >
                     <X className="sf-icon sf-icon-bold w-4 h-4" />
                 </button>
