@@ -4,14 +4,21 @@
   "version": "1.0.0",
   "description": "Finance Management React Frontend",
   "type": "module",
+
+  "engines": {
+    "node": "20.x"
+  },
+
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
+
   "dependencies": {
     "@tanstack/react-query": "^5.100.5",
     "@tanstack/react-query-devtools": "^5.100.5",
@@ -29,6 +36,7 @@
     "xlsx": "^0.18.5",
     "zustand": "^5.0.12"
   },
+
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.5.0",
