@@ -154,7 +154,7 @@ export default function AdminLayout() {
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1">
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -261,6 +261,7 @@ export default function AdminLayout() {
     );
 }
 
+// BẢN VÁ NẰM Ở ĐÂY: Thêm flex, w-full và !block để ép hiện chữ trên Mobile
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -268,14 +269,15 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `nav-item relative group/item ${isActive ? 'router-link-active' : ''}`
+                `nav-item relative group/item flex items-center w-full ${isActive ? 'router-link-active' : ''}`
             }
         >
             <Icon className={`sf-icon sf-icon-regular w-5 h-5 shrink-0 transition-colors duration-200`} />
 
+            {/* Dùng class !block và flex-1 để đè cấu hình ẩn mặc định của Tailwind */}
             <span
-                className={`transition-all duration-300 whitespace-nowrap font-medium ${
-                    isOpen ? 'opacity-100 ml-3 translate-x-0' : 'opacity-0 w-0 hidden md:block -translate-x-2'
+                className={`transition-all duration-300 whitespace-nowrap font-medium flex-1 ${
+                    isOpen ? '!opacity-100 !ml-3 !translate-x-0 !block' : 'opacity-0 w-0 hidden md:block -translate-x-2'
                 }`}
             >
                 {label}
