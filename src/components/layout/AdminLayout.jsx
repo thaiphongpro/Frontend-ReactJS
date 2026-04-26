@@ -9,8 +9,6 @@ import {
 
 import Header from './Header';
 import Footer from './Footer';
-
-// IMPORT ZUSTAND
 import { useSettingsStore } from '../../store/useSettingsStore.js';
 import logoImg from '../../assets/logo-1.png';
 
@@ -19,7 +17,6 @@ export default function AdminLayout() {
     const location = useLocation();
     const { language } = useSettingsStore();
 
-    // STATE BẢO MẬT
     const [isLocked, setIsLocked] = useState(!localStorage.getItem('app_pin'));
     const [pinInput, setPinInput] = useState('');
 
@@ -61,23 +58,23 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* MÀN ĐEN OVERLAY (Chỉ hiện khi Menu mở trên Điện Thoại) */}
+            {/* Màn đen mờ khi mở Menu trên Mobile */}
             <AnimatePresence>
                 {isSidebarOpen && window.innerWidth < 768 && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="fixed inset-0 bg-black/50 dark:bg-black/80 z-[90] backdrop-blur-sm cursor-pointer"
+                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SIDEBAR: Luôn rộng 256px (w-64) trên điện thoại. Khi đóng thì trượt ra ngoài (-translate-x-full) */}
+            {/* SIDEBAR: Đã khôi phục y hệt bản Vue. Luôn rộng 256px (w-64) trên Mobile. */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
                         ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
-                        : '-translate-x-full w-64 md:translate-x-0 md:w-[88px]'
+                        : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
@@ -92,8 +89,8 @@ export default function AdminLayout() {
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                {/* THỦ PHẠM GÂY LỖI CO RÚT LÀ Ở ĐÂY: Đã xóa sạch class items-center, chỉ để flex-col */}
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full flex flex-col">
+                {/* THỦ PHẠM ĐÃ BỊ XÓA: Dùng thẻ <nav> y hệt file Vue, KHÔNG DÙNG flex items-center ở đây */}
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -108,15 +105,12 @@ export default function AdminLayout() {
 
             {/* MAIN CONTENT */}
             <main className={`flex-1 w-full max-w-full flex flex-col min-h-screen relative z-10 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-[88px]'}`}>
-
-                {/* THANH HEADER ĐIỆN THOẠI CHỨA NÚT 3 GẠCH */}
                 <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 pt-safe apple-glass !rounded-none !border-x-0 !border-t-0 shadow-sm">
                     <div className="flex items-center h-10">
                         <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
-                    {/* Bấm vào đây Sidebar sẽ phi từ trái sang */}
-                    <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] outline-none">
-                        <Menu className="sf-icon sf-icon-bold w-4 h-4" />
+                    <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none">
+                        <Menu className="sf-icon sf-icon-bold w-6 h-6" />
                     </button>
                 </div>
 
@@ -124,7 +118,6 @@ export default function AdminLayout() {
                     <Header />
 
                     <div className="flex-1 relative w-full mt-4 md:mt-0">
-                        {/* VÙNG DỮ LIỆU */}
                         <div className={`h-full transition-all duration-700 ease-in-out ${isLocked ? 'blur-[10px] pointer-events-none select-none opacity-30 grayscale-[30%]' : 'blur-0 opacity-100'}`}>
                             <AnimatePresence mode="wait">
                                 <motion.div key={location.pathname} initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }} transition={{ duration: 0.2, ease: "easeOut" }} className="h-full">
@@ -133,7 +126,6 @@ export default function AdminLayout() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Ô KHÓA */}
                         <AnimatePresence>
                             {isLocked && (
                                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="absolute inset-0 z-50 flex items-center justify-center p-4">
@@ -160,7 +152,7 @@ export default function AdminLayout() {
     );
 }
 
-// COMPONENT NAV ITEM: Đã fix lỗi co rút và tàng hình trên Safari
+// KHÔI PHỤC Y HỆT LỚP VUE: Đảm bảo nền sáng full viền, chữ không bị mất
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -168,28 +160,27 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `relative flex items-center w-full px-3 py-2.5 mb-1.5 rounded-[14px] transition-all duration-200 group ${
+                `flex items-center w-full px-3 py-3 mb-1.5 rounded-xl transition-colors relative group/item ${
                     isActive
-                        ? 'bg-[var(--system-orange)]/15 text-[var(--system-orange)] font-semibold'
+                        ? 'bg-[var(--system-orange)]/20 text-[var(--system-orange)] font-bold'
                         : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
                 }`
             }
         >
-            <Icon className="sf-icon sf-icon-regular w-[22px] h-[22px] shrink-0" />
+            <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0" />
 
-            {/* LƯU Ý BẢN VÁ: Trên điện thoại (dưới md) chữ luôn được bật sẵn (không dùng w-0).
-                Chỉ trên máy tính (md:...) mới dùng hiệu ứng thu gọn w-0. Safari sẽ không bao giờ lỗi nữa! */}
-            <div className={`overflow-hidden flex items-center transition-all duration-300 ${
-                isOpen ? 'w-auto opacity-100 ml-3.5' : 'w-auto opacity-100 ml-3.5 md:w-0 md:opacity-0 md:ml-0'
-            }`}>
-                <span className="whitespace-nowrap text-[15px] tracking-wide block">
-                    {label}
-                </span>
-            </div>
+            {/* Logic y hệt bản Vue cũ: Chữ hiện rõ nét khi mở */}
+            <span
+                className={`transition-opacity duration-200 whitespace-nowrap tracking-wide text-[15px] ${
+                    isOpen ? 'opacity-100 ml-3.5 block' : 'opacity-0 w-0 hidden md:block'
+                }`}
+            >
+                {label}
+            </span>
 
             {/* Tooltip khi đóng Sidebar trên Desktop */}
             {!isOpen && (
-                <div className="hidden md:block absolute left-[60px] px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
                 </div>
             )}
