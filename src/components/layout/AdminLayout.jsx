@@ -264,6 +264,7 @@ export default function AdminLayout() {
 // ==========================================
 // COMPONENT MENU ITEM (Đã Fix Lỗi Tàng Hình Chữ Bằng Inline Style)
 // ==========================================
+// CẬP NHẬT NAV ITEM: ÉP SAFARI RENDER BẰNG GPU
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -276,20 +277,21 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
         >
             <Icon className={`sf-icon sf-icon-regular w-5 h-5 shrink-0 transition-colors duration-200`} />
 
-            {/* Dùng div và Inline Style để đè bẹp 100% các file CSS cũ ẩn text trên mobile */}
             <div
                 className="transition-all duration-300 font-medium whitespace-nowrap overflow-hidden"
                 style={{
                     opacity: isOpen ? 1 : 0,
                     maxWidth: isOpen ? '200px' : '0px',
                     marginLeft: isOpen ? '12px' : '0px',
-                    visibility: isOpen ? 'visible' : 'hidden'
+                    visibility: isOpen ? 'visible' : 'hidden',
+                    // ĐÂY LÀ "THẦN CHÚ" TRỊ SAFARI: Ép nó dùng GPU vẽ lại chữ
+                    transform: 'translateZ(0)',
+                    WebkitTransform: 'translateZ(0)'
                 }}
             >
                 {label}
             </div>
 
-            {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
             {!isOpen && (
                 <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
