@@ -25,10 +25,6 @@ export default function Dashboard() {
         return dateString.split('-').reverse().join('/');
     };
 
-    // =========================================================================
-    // REACT QUERY
-    // =========================================================================
-
     const { data: report = { totalRevenue: 0, totalExpense: 0, netBalance: 0 } } = useQuery({
         queryKey: ['report-general'],
         queryFn: () => api.get('/transactions/report/general')
@@ -43,8 +39,6 @@ export default function Dashboard() {
         queryKey: ['transactions', 'EXPENSE'],
         queryFn: () => api.get('/transactions/type/EXPENSE')
     });
-
-    // =========================================================================
 
     const [viewingTx, setViewingTx] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -71,12 +65,8 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-6 relative z-10 apple-container pb-safe">
-
-            {/* ========================================================= */}
-            {/* 3 THẺ THỐNG KÊ (NET BALANCE, REVENUE, EXPENSE)            */}
-            {/* ========================================================= */}
+            {/* 3 THẺ THỐNG KÊ */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
-                {/* Thẻ Net Balance (Sơn Mài) */}
                 <div className="lacquer-glass shadow-glow-red md:col-span-1 p-6 flex flex-col justify-between h-40 transition-transform duration-300 hover:-translate-y-1">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#D4AF37]/20 flex items-center justify-center text-viet-gold shadow-glow-gold">
@@ -84,16 +74,15 @@ export default function Dashboard() {
                         </div>
                         <h3 className="text-[13px] font-bold text-white/80 uppercase tracking-wider">Net Balance</h3>
                     </div>
-                    {/* BẢN VÁ: Dùng truncate và text-2xl cho điện thoại, text-[34px] cho Desktop để không bị tràn */}
+                    {/* BẢN VÁ TRÀN SỐ */}
                     <div className="mt-4 flex w-full">
-                        <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight text-gradient-gold drop-shadow-md truncate w-full">
+                        <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight text-gradient-gold drop-shadow-md truncate block w-full">
                             {formatMoney(report.netBalance)}
                         </span>
                     </div>
                 </div>
 
                 <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {/* Thẻ Money In */}
                     <div className="apple-glass p-6 flex flex-col justify-between h-40 hover:bg-white/60 dark:hover:bg-[#2C2C2E]/80 hover:shadow-glow-gold transition-all cursor-default group">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[var(--system-green)]/10 flex items-center justify-center text-[var(--system-green)] group-hover:bg-[var(--system-green)] group-hover:text-white transition-colors">
@@ -101,14 +90,14 @@ export default function Dashboard() {
                             </div>
                             <h3 className="text-[13px] font-bold text-[var(--label-secondary)] uppercase tracking-wider">Money In</h3>
                         </div>
+                        {/* BẢN VÁ TRÀN SỐ */}
                         <div className="mt-4 flex w-full text-[var(--system-green)]">
-                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate w-full">
+                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate block w-full">
                                 + {formatMoney(report.totalRevenue)}
                             </span>
                         </div>
                     </div>
 
-                    {/* Thẻ Money Out */}
                     <div className="apple-glass p-6 flex flex-col justify-between h-40 hover:bg-white/60 dark:hover:bg-[#2C2C2E]/80 hover:shadow-glow-red transition-all cursor-default group">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-[var(--system-red)]/10 flex items-center justify-center text-[var(--system-red)] group-hover:bg-[var(--system-red)] group-hover:text-white transition-colors">
@@ -116,8 +105,9 @@ export default function Dashboard() {
                             </div>
                             <h3 className="text-[13px] font-bold text-[var(--label-secondary)] uppercase tracking-wider">Money Out</h3>
                         </div>
+                        {/* BẢN VÁ TRÀN SỐ */}
                         <div className="mt-4 flex w-full text-[var(--system-red)]">
-                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate w-full">
+                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate block w-full">
                                 - {formatMoney(report.totalExpense)}
                             </span>
                         </div>
@@ -125,7 +115,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* PHẦN DƯỚI GIỮ NGUYÊN HOÀN TOÀN */}
+            {/* DANH SÁCH GIAO DỊCH GẦN ĐÂY */}
             <div className="apple-glass flex flex-col">
                 <div className="p-5 border-b border-[var(--separator)] flex justify-between items-center">
                     <h3 className="text-[17px] font-bold">Recent Transactions</h3>
@@ -170,8 +160,10 @@ export default function Dashboard() {
                         <div className="flex flex-wrap items-center justify-between pt-5 mt-3 border-t border-[var(--separator)] gap-4">
                             <p className="caption">
                                 Showing <span className="font-bold text-[var(--label-primary)]">{(currentPage - 1) * itemsPerPage + 1}</span> -
-                                <span className="font-bold text-[var(--label-primary)]">{Math.min(currentPage * itemsPerPage, allTransactions.length)}</span> of <span className="font-bold text-[var(--label-primary)]">{allTransactions.length}</span>
+                                <span className="font-bold text-[var(--label-primary)]">{Math.min(currentPage * itemsPerPage, allTransactions.length)}</span>
+                                {' '}of <span className="font-bold text-[var(--label-primary)]">{allTransactions.length}</span>
                             </p>
+
                             <div className="flex items-center gap-2">
                                 <button onClick={prevPage} disabled={currentPage === 1} className="apple-btn-icon !w-8 !h-8 !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] hover:!text-viet-gold hover:border-[#D4AF37] disabled:opacity-40 disabled:hover:border-[var(--separator)] disabled:hover:!text-[var(--label-primary)] disabled:cursor-not-allowed shadow-sm">
                                     <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" />
@@ -218,7 +210,6 @@ export default function Dashboard() {
                     </div>
                 )}
             </AppleModal>
-
         </div>
     );
 }

@@ -10,21 +10,16 @@ import {
 import Header from './Header';
 import Footer from './Footer';
 
-// IMPORT ZUSTAND ĐỂ LẤY NGÔN NGỮ
+// IMPORT ZUSTAND
 import { useSettingsStore } from '../../store/useSettingsStore.js';
-
-// IMPORT LOGO
 import logoImg from '../../assets/logo-1.png';
 
 export default function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const location = useLocation();
-
     const { language } = useSettingsStore();
 
-    // ==========================================
     // STATE BẢO MẬT
-    // ==========================================
     const [isLocked, setIsLocked] = useState(!localStorage.getItem('app_pin'));
     const [pinInput, setPinInput] = useState('');
 
@@ -51,15 +46,7 @@ export default function AdminLayout() {
     };
 
     useEffect(() => {
-        let lastWidth = window.innerWidth;
-        const handleResize = () => {
-            const currentWidth = window.innerWidth;
-            if (currentWidth !== lastWidth) {
-                setIsSidebarOpen(currentWidth >= 768);
-                lastWidth = currentWidth;
-            }
-        };
-
+        const handleResize = () => setIsSidebarOpen(window.innerWidth >= 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -68,61 +55,45 @@ export default function AdminLayout() {
         vi: { home: "Trang chủ", overview: "Tổng quan", categories: "Ví & Nhãn", revenue: "Tiền vào", expense: "Tiền ra", debts: "Vay & Nợ", calendar: "Lịch", taxes: "Thuế", reports: "Báo cáo" },
         en: { home: "Home", overview: "Overview", categories: "Wallets", revenue: "Money In", expense: "Money Out", debts: "Loans", calendar: "Calendar", taxes: "Taxes", reports: "Reports" }
     };
-
     const getMenuLabel = (key) => menuDict[language]?.[key] || menuDict['vi'][key];
 
     return (
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
-
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* Overlay Mobile */}
+            {/* OVERLAY TỪ VUE */}
             <AnimatePresence>
-                {isSidebarOpen && (
+                {isSidebarOpen && window.innerWidth < 768 && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/80 z-[90] backdrop-blur-sm cursor-pointer"
+                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SIDEBAR BẢN RÚT GỌN CHO MOBILE */}
+            {/* SIDEBAR TỪ VUE: Giữ nguyên w-64 trên mobile để không bị bóp méo khung vàng */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-2 md:px-4 z-[100] group pb-safe ${
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
-                        ? 'translate-x-0 w-[88px] md:w-64 shadow-2xl md:shadow-none'
-                        : '-translate-x-full md:translate-x-0 w-[88px]'
+                        ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
+                        : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
-                {/* Nút đóng/mở Sidebar trên Desktop */}
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                {/* Nút X đóng menu trên Mobile (Đẩy ra ngoài rìa Sidebar) */}
-                <AnimatePresence>
-                    {isSidebarOpen && (
-                        <motion.button
-                            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
-                            onClick={() => setIsSidebarOpen(false)}
-                            className="md:hidden absolute -right-[50px] z-50 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] shadow-xl"
-                            style={{ top: 'max(1.5rem, env(safe-area-inset-top, 1.5rem))' }}
-                        >
-                            <X className="sf-icon sf-icon-bold w-4 h-4" />
-                        </motion.button>
-                    )}
-                </AnimatePresence>
+                <button onClick={() => setIsSidebarOpen(false)} className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-transparent text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-50">
+                    <X className="sf-icon sf-icon-bold w-6 h-6" />
+                </button>
 
-                {/* LOGO - Tự động thu nhỏ trên điện thoại */}
-                <div className={`flex items-center justify-center px-2 mb-6 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-14 md:h-20' : 'h-14'}`}>
-                    <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-12 h-12 md:w-44 md:h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
+                <div className={`flex items-center justify-center px-2 mb-8 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
+                    <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                <nav className="flex-1 space-y-2 mt-2 overflow-y-auto custom-scrollbar w-full flex flex-col items-center md:items-stretch">
+                {/* DANH MỤC NAV */}
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -138,11 +109,11 @@ export default function AdminLayout() {
             {/* MAIN CONTENT */}
             <main className={`flex-1 w-full max-w-full flex flex-col min-h-screen relative z-10 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-[88px]'}`}>
                 <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 pt-safe apple-glass !rounded-none !border-x-0 !border-t-0 shadow-sm">
-                    <div className="flex items-center h-10">
-                        <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
+                    <div className="flex items-center h-12">
+                        <div className="logo-custom w-36 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
-                    <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] outline-none">
-                        <Menu className="sf-icon sf-icon-bold w-4 h-4" />
+                    <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none">
+                        <Menu className="sf-icon sf-icon-bold w-6 h-6" />
                     </button>
                 </div>
 
@@ -150,6 +121,7 @@ export default function AdminLayout() {
                     <Header />
 
                     <div className="flex-1 relative w-full mt-4 md:mt-0">
+                        {/* VÙNG DỮ LIỆU */}
                         <div className={`h-full transition-all duration-700 ease-in-out ${isLocked ? 'blur-[10px] pointer-events-none select-none opacity-30 grayscale-[30%]' : 'blur-0 opacity-100'}`}>
                             <AnimatePresence mode="wait">
                                 <motion.div key={location.pathname} initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }} transition={{ duration: 0.2, ease: "easeOut" }} className="h-full">
@@ -178,7 +150,6 @@ export default function AdminLayout() {
                             )}
                         </AnimatePresence>
                     </div>
-
                     <Footer />
                 </div>
             </main>
@@ -186,35 +157,21 @@ export default function AdminLayout() {
     );
 }
 
-// ==========================================
-// COMPONENT MENU ITEM (Bản Icon Only cho Mobile)
-// ==========================================
+// BÊ CHÍNH XÁC CLASS CỦA VUE SANG JSX ĐỂ TRỊ SAFARI
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
             to={to}
             onClick={onClick}
             end={exact}
-            className={({ isActive }) =>
-                `relative flex items-center justify-center md:justify-start w-12 h-12 md:w-full md:h-auto md:px-3 md:py-2.5 rounded-[14px] transition-all duration-200 group ${
-                    isActive
-                        ? 'bg-[var(--system-orange)]/15 text-[var(--system-orange)] font-semibold'
-                        : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
-                }`
-            }
+            className={({ isActive }) => `nav-item relative group/item ${isActive ? 'router-link-active' : ''}`}
         >
-            <Icon className="sf-icon sf-icon-regular w-[22px] h-[22px] shrink-0" />
-
-            {/* Vùng chứa chữ: Bị ẨN HOÀN TOÀN TRÊN MOBILE (md:flex) */}
-            <div className={`hidden md:flex overflow-hidden transition-all duration-300 items-center ${isOpen ? 'w-auto opacity-100 ml-3.5' : 'w-0 opacity-0 ml-0'}`}>
-                <span className="whitespace-nowrap text-[15px] tracking-wide block">
-                    {label}
-                </span>
-            </div>
-
-            {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
+            <Icon className="sf-icon sf-icon-regular w-5 h-5 shrink-0" />
+            <span className={`transition-opacity duration-200 whitespace-nowrap ${isOpen ? 'opacity-100 ml-3' : 'opacity-0 w-0 hidden md:block'}`}>
+                {label}
+            </span>
             {!isOpen && (
-                <div className="hidden md:block absolute left-[60px] px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
                 </div>
             )}
