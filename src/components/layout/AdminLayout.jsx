@@ -264,7 +264,7 @@ export default function AdminLayout() {
 // ==========================================
 // COMPONENT MENU ITEM (Đã Fix Lỗi Tàng Hình Chữ Bằng Inline Style)
 // ==========================================
-// BẢN VÁ TỐI THƯỢNG: Tách luồng render cho Safari Mobile
+// BẢN VÁ TỐI THƯỢNG: Không dùng CSS để ẩn/hiện, dùng React ép vẽ trực tiếp!
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -272,28 +272,26 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `nav-item relative group/item flex items-center w-full overflow-hidden ${isActive ? 'router-link-active' : ''}`
+                `relative group flex items-center w-full px-4 py-3 mb-1.5 rounded-xl transition-all duration-200 ${
+                    isActive
+                        ? 'bg-[var(--system-orange)]/20 text-[var(--system-orange)] font-bold'
+                        : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
+                }`
             }
         >
-            <Icon className={`sf-icon sf-icon-regular w-5 h-5 shrink-0 transition-colors duration-200`} />
+            {/* Icon luôn hiển thị */}
+            <Icon className="w-[22px] h-[22px] shrink-0" />
 
-            {/* 1. DÀNH RIÊNG CHO MOBILE (iPhone/Safari): Không dùng CSS ẩn, render trực tiếp chữ */}
-            <span className="md:hidden font-medium flex-1 min-w-0 truncate text-[15px] pl-3">
-                {isOpen ? label : ''}
-            </span>
-
-            {/* 2. DÀNH RIÊNG CHO DESKTOP: Giữ nguyên hiệu ứng mượt mà (ẩn trên màn hình nhỏ) */}
-            <span
-                className={`hidden md:block transition-all duration-300 font-medium whitespace-nowrap overflow-hidden ${
-                    isOpen ? 'opacity-100 ml-3 max-w-[200px]' : 'opacity-0 max-w-0'
-                }`}
-            >
-                {label}
-            </span>
+            {/* CHÌA KHÓA TRỊ SAFARI: Chỉ khi Menu mở (isOpen = true), chữ mới được phép vẽ ra */}
+            {isOpen && (
+                <span className="ml-3.5 text-[15px] whitespace-nowrap tracking-wide" style={{ color: 'inherit' }}>
+                    {label}
+                </span>
+            )}
 
             {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
             {!isOpen && (
-                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
                 </div>
             )}
