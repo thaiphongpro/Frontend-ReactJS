@@ -11,10 +11,8 @@ import { useSettingsStore } from '../store/useSettingsStore.js';
 import api from '../utils/useApi.js';
 
 export default function Dashboard() {
-    // 1. Chỉ lấy currency từ Store (Đã xóa formatMoney ở đây để tránh lỗi)
     const { currency } = useSettingsStore();
 
-    // 2. Viết hàm formatMoney cục bộ ngay trong Component
     const formatMoney = (amount) => {
         return new Intl.NumberFormat(currency === 'VND' ? 'vi-VN' : 'en-US', {
             style: 'currency',
@@ -28,7 +26,7 @@ export default function Dashboard() {
     };
 
     // =========================================================================
-    // REACT QUERY: Lấy data, tự động Cache, hiển thị tức thì
+    // REACT QUERY
     // =========================================================================
 
     const { data: report = { totalRevenue: 0, totalExpense: 0, netBalance: 0 } } = useQuery({
@@ -48,25 +46,19 @@ export default function Dashboard() {
 
     // =========================================================================
 
-    // State điều khiển giao diện
     const [viewingTx, setViewingTx] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    // 3. Tính toán gộp mảng với LỚP BẢO VỆ CHỐNG CRASH
     const allTransactions = useMemo(() => {
-        // Đảm bảo dữ liệu luôn là mảng trước khi gộp
         const safeRevenues = Array.isArray(allRevenues) ? allRevenues : [];
         const safeExpenses = Array.isArray(allExpenses) ? allExpenses : [];
-
         const combined = [...safeRevenues, ...safeExpenses];
-        // Lọc bỏ những dòng dữ liệu bị hỏng (nếu có)
         const validCombined = combined.filter(tx => tx && tx.date);
         validCombined.sort((a, b) => new Date(b.date) - new Date(a.date));
         return validCombined;
     }, [allRevenues, allExpenses]);
 
-    // Logic phân trang
     const totalPages = useMemo(() => Math.ceil(allTransactions.length / itemsPerPage) || 1, [allTransactions.length]);
 
     const paginatedTransactions = useMemo(() => {
@@ -92,12 +84,11 @@ export default function Dashboard() {
                         </div>
                         <h3 className="text-[13px] font-bold text-white/80 uppercase tracking-wider">Net Balance</h3>
                     </div>
-                    <div className="mt-4">
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-[34px] font-black tabular-nums tracking-tight text-gradient-gold drop-shadow-md">
-                                {formatMoney(report.netBalance)}
-                            </span>
-                        </div>
+                    {/* BẢN VÁ: Dùng truncate và text-2xl cho điện thoại, text-[34px] cho Desktop để không bị tràn */}
+                    <div className="mt-4 flex w-full">
+                        <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight text-gradient-gold drop-shadow-md truncate w-full">
+                            {formatMoney(report.netBalance)}
+                        </span>
                     </div>
                 </div>
 
@@ -110,10 +101,10 @@ export default function Dashboard() {
                             </div>
                             <h3 className="text-[13px] font-bold text-[var(--label-secondary)] uppercase tracking-wider">Money In</h3>
                         </div>
-                        <div className="mt-4">
-                            <div className="flex items-baseline gap-1 text-[var(--system-green)]">
-                                <span className="text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm">+ {formatMoney(report.totalRevenue)}</span>
-                            </div>
+                        <div className="mt-4 flex w-full text-[var(--system-green)]">
+                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate w-full">
+                                + {formatMoney(report.totalRevenue)}
+                            </span>
                         </div>
                     </div>
 
@@ -125,18 +116,16 @@ export default function Dashboard() {
                             </div>
                             <h3 className="text-[13px] font-bold text-[var(--label-secondary)] uppercase tracking-wider">Money Out</h3>
                         </div>
-                        <div className="mt-4">
-                            <div className="flex items-baseline gap-1 text-[var(--system-red)]">
-                                <span className="text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm">- {formatMoney(report.totalExpense)}</span>
-                            </div>
+                        <div className="mt-4 flex w-full text-[var(--system-red)]">
+                            <span className="text-2xl md:text-[34px] font-black tabular-nums tracking-tight drop-shadow-sm truncate w-full">
+                                - {formatMoney(report.totalExpense)}
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* ========================================================= */}
-            {/* DANH SÁCH GIAO DỊCH GẦN ĐÂY                               */}
-            {/* ========================================================= */}
+            {/* PHẦN DƯỚI GIỮ NGUYÊN HOÀN TOÀN */}
             <div className="apple-glass flex flex-col">
                 <div className="p-5 border-b border-[var(--separator)] flex justify-between items-center">
                     <h3 className="text-[17px] font-bold">Recent Transactions</h3>
@@ -146,7 +135,6 @@ export default function Dashboard() {
                 </div>
 
                 <div className="p-4 sm:p-6 flex-1 flex flex-col">
-                    {/* Trạng thái trống */}
                     {allTransactions.length === 0 && (
                         <div className="text-center py-12 flex flex-col items-center justify-center">
                             <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] flex items-center justify-center mb-3">
@@ -156,68 +144,40 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    {/* Render danh sách */}
                     <div className="flex-1">
                         {paginatedTransactions.map(tx => (
-                            <div
-                                key={tx.id}
-                                onClick={() => setViewingTx(tx)}
-                                className="cursor-pointer flex justify-between items-center py-3.5 border-b border-[var(--separator)] last:border-0 hover:bg-[var(--bg-elevated-secondary)] transition-all px-3 rounded-xl -mx-3 group"
-                            >
+                            <div key={tx.id} onClick={() => setViewingTx(tx)} className="cursor-pointer flex justify-between items-center py-3.5 border-b border-[var(--separator)] last:border-0 hover:bg-[var(--bg-elevated-secondary)] transition-all px-3 rounded-xl -mx-3 group">
                                 <div className="flex items-center gap-4 overflow-hidden">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform ${
-                                        tx.type === 'REVENUE' ? 'bg-[var(--system-green)]/10 text-[var(--system-green)]' : 'bg-[var(--system-red)]/10 text-[var(--system-red)]'
-                                    }`}>
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform ${tx.type === 'REVENUE' ? 'bg-[var(--system-green)]/10 text-[var(--system-green)]' : 'bg-[var(--system-red)]/10 text-[var(--system-red)]'}`}>
                                         {tx.type === 'REVENUE' ? <Plus className="sf-icon sf-icon-bold w-5 h-5" /> : <Minus className="sf-icon sf-icon-bold w-5 h-5" />}
                                     </div>
-
                                     <div className="min-w-0">
                                         <p className="font-semibold text-[15px] truncate group-hover:text-viet-gold transition-colors">{tx.category}</p>
                                         <p className="caption truncate mt-0.5">
                                             {formatDate(tx.date)}
-                                            {tx.source && (
-                                                <span className="text-viet-gold ml-1 px-1.5 py-0.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-md font-bold uppercase tracking-wider text-[9px]">
-                                                    {tx.source}
-                                                </span>
-                                            )}
+                                            {tx.source && <span className="text-viet-gold ml-1 px-1.5 py-0.5 bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-md font-bold uppercase tracking-wider text-[9px]">{tx.source}</span>}
                                         </p>
                                     </div>
                                 </div>
-
-                                <p className={`font-bold text-[15px] tabular-nums tracking-tight whitespace-nowrap pl-4 ${
-                                    tx.type === 'REVENUE' ? 'text-[var(--system-green)]' : 'text-[var(--system-red)]'
-                                }`}>
+                                <p className={`font-bold text-[15px] tabular-nums tracking-tight whitespace-nowrap pl-4 ${tx.type === 'REVENUE' ? 'text-[var(--system-green)]' : 'text-[var(--system-red)]'}`}>
                                     {tx.type === 'REVENUE' ? '+' : '-'} {formatMoney(tx.amount)}
                                 </p>
                             </div>
                         ))}
                     </div>
 
-                    {/* Phân trang */}
                     {totalPages > 1 && (
                         <div className="flex flex-wrap items-center justify-between pt-5 mt-3 border-t border-[var(--separator)] gap-4">
                             <p className="caption">
                                 Showing <span className="font-bold text-[var(--label-primary)]">{(currentPage - 1) * itemsPerPage + 1}</span> -
-                                <span className="font-bold text-[var(--label-primary)]">{Math.min(currentPage * itemsPerPage, allTransactions.length)}</span>
-                                {' '}of <span className="font-bold text-[var(--label-primary)]">{allTransactions.length}</span>
+                                <span className="font-bold text-[var(--label-primary)]">{Math.min(currentPage * itemsPerPage, allTransactions.length)}</span> of <span className="font-bold text-[var(--label-primary)]">{allTransactions.length}</span>
                             </p>
-
                             <div className="flex items-center gap-2">
-                                <button
-                                    onClick={prevPage}
-                                    disabled={currentPage === 1}
-                                    className="apple-btn-icon !w-8 !h-8 !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] hover:!text-viet-gold hover:border-[#D4AF37] disabled:opacity-40 disabled:hover:border-[var(--separator)] disabled:hover:!text-[var(--label-primary)] disabled:cursor-not-allowed shadow-sm"
-                                >
+                                <button onClick={prevPage} disabled={currentPage === 1} className="apple-btn-icon !w-8 !h-8 !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] hover:!text-viet-gold hover:border-[#D4AF37] disabled:opacity-40 disabled:hover:border-[var(--separator)] disabled:hover:!text-[var(--label-primary)] disabled:cursor-not-allowed shadow-sm">
                                     <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" />
                                 </button>
-
                                 <span className="text-[13px] font-bold px-2">Page {currentPage} of {totalPages}</span>
-
-                                <button
-                                    onClick={nextPage}
-                                    disabled={currentPage === totalPages}
-                                    className="apple-btn-icon !w-8 !h-8 !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] hover:!text-viet-gold hover:border-[#D4AF37] disabled:opacity-40 disabled:hover:border-[var(--separator)] disabled:hover:!text-[var(--label-primary)] disabled:cursor-not-allowed shadow-sm"
-                                >
+                                <button onClick={nextPage} disabled={currentPage === totalPages} className="apple-btn-icon !w-8 !h-8 !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-primary)] hover:!text-viet-gold hover:border-[#D4AF37] disabled:opacity-40 disabled:hover:border-[var(--separator)] disabled:hover:!text-[var(--label-primary)] disabled:cursor-not-allowed shadow-sm">
                                     <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />
                                 </button>
                             </div>
@@ -226,32 +186,19 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* ========================================================= */}
-            {/* MODAL CHI TIẾT GIAO DỊCH (Transaction Receipt)            */}
-            {/* ========================================================= */}
-            <AppleModal
-                show={!!viewingTx}
-                title="Transaction Receipt"
-                confirmText="Close"
-                onClose={() => setViewingTx(null)}
-                onConfirm={() => setViewingTx(null)}
-            >
+            {/* MODAL */}
+            <AppleModal show={!!viewingTx} title="Transaction Receipt" confirmText="Close" onClose={() => setViewingTx(null)} onConfirm={() => setViewingTx(null)}>
                 {viewingTx && (
                     <div className="px-2 pb-2 text-left">
                         <div className="flex flex-col items-center justify-center pb-6 border-b border-[var(--separator)] mb-5">
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 shadow-sm border ${
-                                viewingTx.type === 'REVENUE' ? 'bg-[var(--system-green)]/10 text-[var(--system-green)] border-[var(--system-green)]/30' : 'bg-[var(--system-red)]/10 text-[var(--system-red)] border-[var(--system-red)]/30'
-                            }`}>
+                            <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 shadow-sm border ${viewingTx.type === 'REVENUE' ? 'bg-[var(--system-green)]/10 text-[var(--system-green)] border-[var(--system-green)]/30' : 'bg-[var(--system-red)]/10 text-[var(--system-red)] border-[var(--system-red)]/30'}`}>
                                 {viewingTx.type === 'REVENUE' ? <Plus className="sf-icon sf-icon-bold w-7 h-7" /> : <Minus className="sf-icon sf-icon-bold w-7 h-7" />}
                             </div>
-                            <h2 className={`text-[32px] font-black tabular-nums tracking-tight leading-none drop-shadow-sm ${
-                                viewingTx.type === 'REVENUE' ? 'text-[var(--system-green)]' : 'text-[var(--system-red)]'
-                            }`}>
+                            <h2 className={`text-[32px] font-black tabular-nums tracking-tight leading-none drop-shadow-sm ${viewingTx.type === 'REVENUE' ? 'text-[var(--system-green)]' : 'text-[var(--system-red)]'}`}>
                                 {viewingTx.type === 'REVENUE' ? '+' : '-'} {formatMoney(viewingTx.amount)}
                             </h2>
                             <p className="text-[13px] font-bold text-viet-gold uppercase mt-2 tracking-widest">{viewingTx.category}</p>
                         </div>
-
                         <div className="space-y-4 text-[14px]">
                             <div className="flex justify-between items-center">
                                 <span className="caption">Date</span>

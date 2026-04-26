@@ -85,37 +85,44 @@ export default function AdminLayout() {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-[90] backdrop-blur-sm cursor-pointer"
+                        className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/80 z-[90] backdrop-blur-sm cursor-pointer"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SIDEBAR */}
+            {/* SIDEBAR BẢN RÚT GỌN CHO MOBILE */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
-                    isSidebarOpen ? 'translate-x-0 w-64 shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0 w-[88px]'
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-2 md:px-4 z-[100] group pb-safe ${
+                    isSidebarOpen
+                        ? 'translate-x-0 w-[88px] md:w-64 shadow-2xl md:shadow-none'
+                        : '-translate-x-full md:translate-x-0 w-[88px]'
                 }`}
             >
+                {/* Nút đóng/mở Sidebar trên Desktop */}
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                <button onClick={() => setIsSidebarOpen(false)} className="md:hidden absolute right-4 z-50 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] shadow-lg" style={{ top: 'max(1.5rem, env(safe-area-inset-top, 1.5rem))' }}>
-                    <X className="sf-icon sf-icon-bold w-4 h-4" />
-                </button>
+                {/* Nút X đóng menu trên Mobile (Đẩy ra ngoài rìa Sidebar) */}
+                <AnimatePresence>
+                    {isSidebarOpen && (
+                        <motion.button
+                            initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="md:hidden absolute -right-[50px] z-50 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] shadow-xl"
+                            style={{ top: 'max(1.5rem, env(safe-area-inset-top, 1.5rem))' }}
+                        >
+                            <X className="sf-icon sf-icon-bold w-4 h-4" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
 
-                <div className={`flex items-center justify-center px-2 mb-2 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
-                    <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
+                {/* LOGO - Tự động thu nhỏ trên điện thoại */}
+                <div className={`flex items-center justify-center px-2 mb-6 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-14 md:h-20' : 'h-14'}`}>
+                    <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-12 h-12 md:w-44 md:h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                {/* MÁY DÒ PHIÊN BẢN - NẾU KHÔNG THẤY DÒNG NÀY TRÊN IPHONE TỨC LÀ VẪN BỊ LƯU CACHE/SAI THƯ MỤC BUILD */}
-                {isSidebarOpen && (
-                    <div className="text-center text-[var(--system-red)] font-bold text-[10px] mb-6 tracking-wider">
-                        BẢN VÁ: 27/04 - V1
-                    </div>
-                )}
-
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full">
+                <nav className="flex-1 space-y-2 mt-2 overflow-y-auto custom-scrollbar w-full flex flex-col items-center md:items-stretch">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -180,7 +187,7 @@ export default function AdminLayout() {
 }
 
 // ==========================================
-// BẢN VÁ TỐI THƯỢNG CHO NAVITEM: Đảm bảo "mượt như lụa" trên cả Safari
+// COMPONENT MENU ITEM (Bản Icon Only cho Mobile)
 // ==========================================
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
@@ -189,7 +196,7 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `relative flex items-center w-full px-3 py-2.5 mb-1.5 rounded-[14px] transition-all duration-200 group ${
+                `relative flex items-center justify-center md:justify-start w-12 h-12 md:w-full md:h-auto md:px-3 md:py-2.5 rounded-[14px] transition-all duration-200 group ${
                     isActive
                         ? 'bg-[var(--system-orange)]/15 text-[var(--system-orange)] font-semibold'
                         : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
@@ -198,13 +205,14 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
         >
             <Icon className="sf-icon sf-icon-regular w-[22px] h-[22px] shrink-0" />
 
-            {/* Vùng chứa chữ: Dùng Flexbox chuẩn Apple thay vì max-width để Safari không bị ngáo */}
-            <div className={`overflow-hidden transition-all duration-300 flex items-center ${isOpen ? 'w-auto opacity-100 ml-3.5' : 'w-0 opacity-0 ml-0'}`}>
+            {/* Vùng chứa chữ: Bị ẨN HOÀN TOÀN TRÊN MOBILE (md:flex) */}
+            <div className={`hidden md:flex overflow-hidden transition-all duration-300 items-center ${isOpen ? 'w-auto opacity-100 ml-3.5' : 'w-0 opacity-0 ml-0'}`}>
                 <span className="whitespace-nowrap text-[15px] tracking-wide block">
                     {label}
                 </span>
             </div>
 
+            {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
             {!isOpen && (
                 <div className="hidden md:block absolute left-[60px] px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
