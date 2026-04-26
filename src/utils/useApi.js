@@ -3,7 +3,7 @@ import { useToastStore } from '../store/useToastStore.js';
 
 const api = axios.create({
     // Dùng biến môi trường Vite, nếu chưa cấu hình thì mặc định chạy Localhost
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:7777/api/',
+    baseURL: import.meta.env.VITE_API_URL || 'https://finance-management-backend-k25i.onrender.com/api/',
     // Nâng lên 15s để đề phòng những API truy vấn Báo cáo phức tạp tốn nhiều thời gian
     timeout: 15000,
     headers: {
