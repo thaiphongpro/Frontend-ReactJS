@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Home, LayoutGrid, Tag, ArrowDownToLine, ArrowUpToLine,
     Users, CalendarDays, Calculator, PieChart, ChevronLeft,
-    ChevronRight, Menu, X, LockKeyhole
+    ChevronRight, Menu, X, LockKeyhole // <-- Đã thêm icon LockKeyhole
 } from 'lucide-react';
 
 import Header from './Header';
@@ -54,19 +54,9 @@ export default function AdminLayout() {
         if (window.innerWidth < 768) setIsSidebarOpen(false);
     };
 
-    // ==========================================
-    // FIX LỖI KẸT SIDEBAR TRÊN MOBILE
-    // ==========================================
     useEffect(() => {
-        let lastWidth = window.innerWidth;
         const handleResize = () => {
-            const currentWidth = window.innerWidth;
-            // Chỉ chạy logic đóng mở khi chiều NGANG thực sự thay đổi
-            // (Phớt lờ việc cuộn trang làm đổi chiều cao trên điện thoại)
-            if (currentWidth !== lastWidth) {
-                setIsSidebarOpen(currentWidth >= 768);
-                lastWidth = currentWidth;
-            }
+            setIsSidebarOpen(window.innerWidth >= 768);
         };
 
         window.addEventListener('resize', handleResize);
@@ -108,25 +98,25 @@ export default function AdminLayout() {
             {/* Pattern */}
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* Overlay Mobile (Đã tối ưu để có thể chạm vào phần nền tối tắt menu) */}
+            {/* Overlay Mobile */}
             <AnimatePresence>
-                {isSidebarOpen && (
+                {isSidebarOpen && window.innerWidth < 768 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="md:hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-[90] backdrop-blur-sm cursor-pointer"
+                        className="md:hidden fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
             {/* SIDEBAR */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
-                        ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
+                        ? 'translate-x-0 w-64'
                         : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
@@ -141,11 +131,9 @@ export default function AdminLayout() {
                     )}
                 </button>
 
-                {/* NÚT X ĐÓNG MENU (Đã fix lỗi bị Tai thỏ iPhone che khuất) */}
                 <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="md:hidden absolute right-4 z-50 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] shadow-lg"
-                    style={{ top: 'max(1.5rem, env(safe-area-inset-top, 1.5rem))' }}
+                    className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-[var(--bg-elevated)] border border-[var(--separator)] text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-50"
                 >
                     <X className="sf-icon sf-icon-bold w-4 h-4" />
                 </button>
@@ -154,7 +142,7 @@ export default function AdminLayout() {
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full">
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -261,7 +249,7 @@ export default function AdminLayout() {
     );
 }
 
-// BẢN VÁ NẰM Ở ĐÂY: Thêm flex, w-full và !block để ép hiện chữ trên Mobile
+// BẢN VÁ TỐI THƯỢNG: Không dùng hidden/block nữa, dùng max-w để chống lỗi 100%
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -269,15 +257,15 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `nav-item relative group/item flex items-center w-full ${isActive ? 'router-link-active' : ''}`
+                `nav-item relative group/item flex items-center w-full overflow-hidden ${isActive ? 'router-link-active' : ''}`
             }
         >
             <Icon className={`sf-icon sf-icon-regular w-5 h-5 shrink-0 transition-colors duration-200`} />
 
-            {/* Dùng class !block và flex-1 để đè cấu hình ẩn mặc định của Tailwind */}
+            {/* Thuật toán hiển thị chữ mượt mà bằng max-w-0 -> max-w-[200px] */}
             <span
-                className={`transition-all duration-300 whitespace-nowrap font-medium flex-1 ${
-                    isOpen ? '!opacity-100 !ml-3 !translate-x-0 !block' : 'opacity-0 w-0 hidden md:block -translate-x-2'
+                className={`transition-all duration-300 font-medium whitespace-nowrap overflow-hidden ${
+                    isOpen ? 'opacity-100 ml-3 max-w-[200px] translate-x-0' : 'opacity-0 max-w-0 ml-0 -translate-x-2'
                 }`}
             >
                 {label}
