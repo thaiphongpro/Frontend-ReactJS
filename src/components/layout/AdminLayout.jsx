@@ -264,7 +264,7 @@ export default function AdminLayout() {
 // ==========================================
 // COMPONENT MENU ITEM (Đã Fix Lỗi Tàng Hình Chữ Bằng Inline Style)
 // ==========================================
-// CẬP NHẬT NAV ITEM: ÉP SAFARI RENDER BẰNG GPU
+// BẢN VÁ TỐI THƯỢNG: Tách luồng render cho Safari Mobile
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -272,26 +272,26 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `nav-item relative group/item flex items-center w-full ${isActive ? 'router-link-active' : ''}`
+                `nav-item relative group/item flex items-center w-full overflow-hidden ${isActive ? 'router-link-active' : ''}`
             }
         >
             <Icon className={`sf-icon sf-icon-regular w-5 h-5 shrink-0 transition-colors duration-200`} />
 
-            <div
-                className="transition-all duration-300 font-medium whitespace-nowrap overflow-hidden"
-                style={{
-                    opacity: isOpen ? 1 : 0,
-                    maxWidth: isOpen ? '200px' : '0px',
-                    marginLeft: isOpen ? '12px' : '0px',
-                    visibility: isOpen ? 'visible' : 'hidden',
-                    // ĐÂY LÀ "THẦN CHÚ" TRỊ SAFARI: Ép nó dùng GPU vẽ lại chữ
-                    transform: 'translateZ(0)',
-                    WebkitTransform: 'translateZ(0)'
-                }}
+            {/* 1. DÀNH RIÊNG CHO MOBILE (iPhone/Safari): Không dùng CSS ẩn, render trực tiếp chữ */}
+            <span className="md:hidden font-medium flex-1 min-w-0 truncate text-[15px] pl-3">
+                {isOpen ? label : ''}
+            </span>
+
+            {/* 2. DÀNH RIÊNG CHO DESKTOP: Giữ nguyên hiệu ứng mượt mà (ẩn trên màn hình nhỏ) */}
+            <span
+                className={`hidden md:block transition-all duration-300 font-medium whitespace-nowrap overflow-hidden ${
+                    isOpen ? 'opacity-100 ml-3 max-w-[200px]' : 'opacity-0 max-w-0'
+                }`}
             >
                 {label}
-            </div>
+            </span>
 
+            {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
             {!isOpen && (
                 <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
