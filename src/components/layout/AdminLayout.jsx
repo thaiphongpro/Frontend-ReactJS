@@ -10,11 +10,12 @@ import {
 import Header from './Header';
 import Footer from './Footer';
 
-// IMPORT ZUSTAND
+// IMPORT ZUSTAND ĐỂ LẤY NGÔN NGỮ
 import { useSettingsStore } from '../../store/useSettingsStore.js';
 import logoImg from '../../assets/logo-1.png';
 
 export default function AdminLayout() {
+    // Tự động kiểm tra: Máy tính thì mở, điện thoại thì ĐÓNG (false)
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const location = useLocation();
     const { language } = useSettingsStore();
@@ -61,23 +62,23 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* OVERLAY TỪ VUE */}
+            {/* MÀN ĐEN OVERLAY (Chỉ hiện khi Menu mở trên Điện Thoại) */}
             <AnimatePresence>
                 {isSidebarOpen && window.innerWidth < 768 && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
                         onClick={() => setIsSidebarOpen(false)}
-                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/50 dark:bg-black/70 z-[90] backdrop-blur-sm cursor-pointer"
                     ></motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SIDEBAR TỪ VUE: Giữ nguyên w-64 trên mobile để không bị bóp méo khung vàng */}
+            {/* SIDEBAR: Ẩn tịt sang trái (-translate-x-full) khi đóng trên điện thoại */}
             <aside
                 className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
                         ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
-                        : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
+                        : '-translate-x-full w-64 md:translate-x-0 md:w-[88px]'
                 }`}
             >
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
@@ -92,8 +93,7 @@ export default function AdminLayout() {
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                {/* DANH MỤC NAV */}
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1">
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -108,10 +108,13 @@ export default function AdminLayout() {
 
             {/* MAIN CONTENT */}
             <main className={`flex-1 w-full max-w-full flex flex-col min-h-screen relative z-10 transition-all duration-300 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-[88px]'}`}>
+
+                {/* THANH ĐIỀU HƯỚNG TRÊN MOBILE: Chứa nút 3 gạch */}
                 <div className="md:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 pt-safe apple-glass !rounded-none !border-x-0 !border-t-0 shadow-sm">
                     <div className="flex items-center h-12">
                         <div className="logo-custom w-36 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
+                    {/* Bấm vào 3 gạch -> setIsSidebarOpen(true) -> Gọi Menu xuất hiện */}
                     <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none">
                         <Menu className="sf-icon sf-icon-bold w-6 h-6" />
                     </button>
@@ -157,21 +160,33 @@ export default function AdminLayout() {
     );
 }
 
-// BÊ CHÍNH XÁC CLASS CỦA VUE SANG JSX ĐỂ TRỊ SAFARI
+// COMPONENT NAV ITEM: Hiển thị chữ đầy đủ khi Menu mở
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
             to={to}
             onClick={onClick}
             end={exact}
-            className={({ isActive }) => `nav-item relative group/item ${isActive ? 'router-link-active' : ''}`}
+            className={({ isActive }) =>
+                `relative flex items-center w-full px-3 py-2.5 mb-1.5 rounded-[14px] transition-all duration-200 group ${
+                    isActive
+                        ? 'bg-[var(--system-orange)]/15 text-[var(--system-orange)] font-semibold'
+                        : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
+                }`
+            }
         >
-            <Icon className="sf-icon sf-icon-regular w-5 h-5 shrink-0" />
-            <span className={`transition-opacity duration-200 whitespace-nowrap ${isOpen ? 'opacity-100 ml-3' : 'opacity-0 w-0 hidden md:block'}`}>
-                {label}
-            </span>
+            <Icon className="sf-icon sf-icon-regular w-[22px] h-[22px] shrink-0" />
+
+            {/* Chữ sẽ luôn hiện nếu Menu đang ở trạng thái Mở (isOpen = true) */}
+            <div className={`overflow-hidden transition-all duration-300 flex items-center ${isOpen ? 'w-auto opacity-100 ml-3.5' : 'w-0 opacity-0 ml-0'}`}>
+                <span className="whitespace-nowrap text-[15px] tracking-wide block">
+                    {label}
+                </span>
+            </div>
+
+            {/* Tooltip khi đóng Sidebar (Chỉ hiện trên Desktop) */}
             {!isOpen && (
-                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                <div className="hidden md:block absolute left-[60px] px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
                 </div>
             )}
