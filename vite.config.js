@@ -7,7 +7,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate', // Tự động cập nhật app khi có phiên bản mới
-      includeAssets: ['logo-1.png', 'apple-touch-icon.png', 'mask-icon.svg'], // Các tài sản tĩnh
+      // Đã thêm dấu / ở trước để trỏ đúng vào thư mục public/
+      includeAssets: ['/logo-1.png', '/apple-touch-icon.png', '/mask-icon.svg'],
       manifest: {
         name: 'Góc Tài Chính',
         short_name: 'Tài Chính',
@@ -17,22 +18,28 @@ export default defineConfig({
         display: 'standalone', // Chạy full màn hình như app thật
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png', // Đã thêm dấu /
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png', // Đã thêm dấu /
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png', // Đã thêm dấu /
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable' // Hỗ trợ icon bo góc chuẩn Android/iOS
           }
         ]
+      },
+      workbox: {
+        // VŨ KHÍ TỐI THƯỢNG TRỊ CACHE IOS: Ép dọn sạch cache cũ khi có code mới
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true
       }
     })
   ],
