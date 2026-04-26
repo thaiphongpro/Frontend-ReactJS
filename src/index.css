@@ -1,0 +1,441 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ========================================================================= */
+  /* === 0. APPLE SEMANTIC & SYSTEM COLORS (HIG COLOR & DARK MODE) === */
+  /* ========================================================================= */
+  :root {
+    --label-primary: #1d1d1f;
+    --label-secondary: #86868b;
+    --label-tertiary: #aeaeb2;
+
+    --bg-base: #f5f5f7;
+    --bg-elevated: #ffffff;
+    --bg-elevated-secondary: #f2f2f7;
+
+    --system-blue: #007aff;
+    --system-green: #34c759;
+    --system-orange: #ff9500;
+    --system-red: #ff3b30;
+
+    --separator: rgba(60, 60, 67, 0.36);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+
+    /* ========================================================================= */
+    /* === (NEW) APPLE SPACING TOKENS (HIG LAYOUT) === */
+    /* ========================================================================= */
+    /* Hệ thống khoảng cách chuẩn xác theo bội số của 8 để tạo nhịp điệu thị giác */
+    --space-tight: 8px;
+    --space-standard: 16px;
+    --space-loose: 24px;
+    --space-extra-loose: 32px;
+  }
+
+  .dark {
+    --label-primary: rgba(255, 255, 255, 0.85);
+    --label-secondary: rgba(235, 235, 245, 0.60);
+    --label-tertiary: rgba(235, 235, 245, 0.30);
+
+    --bg-base: #000000;
+    --bg-elevated: #1c1c1e;
+    --bg-elevated-secondary: #2c2c2e;
+
+    --system-blue: #0a84ff;
+    --system-green: #32d74b;
+    --system-orange: #ff9f0a;
+    --system-red: #ff453a;
+
+    --separator: rgba(84, 84, 88, 0.65);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+  }
+
+  /* === 1. APPLE TYPOGRAPHY: SYSTEM FONT STACK === */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    color: var(--label-primary);
+
+    letter-spacing: -0.022em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv03", "cv04", "cv11";
+
+    background-color: var(--bg-base);
+    background-image:
+            radial-gradient(circle at 0% 0%, rgba(0, 122, 255, 0.08) 0%, rgba(175, 82, 222, 0.05) 25%, transparent 50%),
+            radial-gradient(circle at 100% 40%, rgba(255, 153, 0, 0.08) 0%, rgba(255, 214, 10, 0.05) 30%, transparent 50%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    line-height: 1.47059;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
+
+  input, textarea, select {
+    -webkit-user-select: auto !important;
+    -moz-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+  }
+
+  /* === 2. HỆ THỐNG PHÂN CẤP (HIERARCHY & TYPE SCALE) === */
+  h1 {
+    @apply text-[48px] md:text-[80px] font-bold;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+    color: var(--label-primary);
+  }
+  h2 {
+    @apply text-[32px] md:text-[48px] font-semibold;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    letter-spacing: -0.012em;
+    line-height: 1.1;
+    color: var(--label-primary);
+  }
+  h3 {
+    @apply text-[20px] md:text-[28px] font-semibold;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    letter-spacing: -0.008em;
+    line-height: 1.2;
+    color: var(--label-primary);
+  }
+  p, div, span {
+    @apply text-[16px] md:text-[17px] font-normal;
+  }
+
+  /* === 3. CHẾ ĐỘ DARK MODE === */
+  .dark body {
+    background-image:
+            radial-gradient(circle at 0% 0%, rgba(0, 122, 255, 0.15) 0%, rgba(175, 82, 222, 0.1) 30%, transparent 50%),
+            radial-gradient(circle at 100% 40%, rgba(255, 153, 0, 0.12) 0%, rgba(255, 214, 10, 0.08) 30%, transparent 50%);
+  }
+
+  /* === 4. CHỐNG TRÀN, MƯỢT MÀ VÀ THANH CUỘN === */
+  *, *::before, *::after {
+    @apply transition-colors duration-300 ease-in-out;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+  html { scroll-behavior: smooth; overscroll-behavior-y: none; }
+  html, body, #app { @apply h-full w-full m-0 p-0; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-gray-300 rounded-full transition-colors; }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--system-orange); }
+  .dark ::-webkit-scrollbar-thumb { @apply bg-[#4b5563]; }
+  .dark ::-webkit-scrollbar-thumb:hover { background-color: var(--system-orange); }
+
+  /* === 11. ACCESSIBILITY: FOCUS & REDUCED MOTION === */
+  *:focus-visible {
+    outline: 3px solid var(--system-orange);
+    outline-offset: 3px;
+    transition: outline-offset 0.2s ease;
+    border-radius: inherit;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+      transform: none !important;
+    }
+  }
+
+  /* === 13. ACCESSIBILITY: HIGH CONTRAST === */
+  @media (prefers-contrast: more) {
+    :root {
+      --label-secondary: #000000;
+      --label-tertiary: #333333;
+      --separator: #000000;
+    }
+    .dark {
+      --label-primary: #ffffff;
+      --label-secondary: #ffffff;
+      --label-tertiary: #cccccc;
+      --separator: #ffffff;
+      --border-subtle: #ffffff;
+    }
+    .apple-glass {
+      background: white !important;
+      border: 1.5px solid black !important;
+      box-shadow: none !important;
+    }
+    .dark .apple-glass {
+      background: black !important;
+      border: 1.5px solid white !important;
+    }
+    .text-gradient-gold, .btn-dong-son-gold {
+      color: #000000 !important;
+      border: 2px solid #000000 !important;
+      box-shadow: none !important;
+    }
+    .dark .btn-dong-son-gold {
+      color: #ffffff !important;
+      border: 2px solid #ffffff !important;
+    }
+  }
+}
+
+@layer components {
+  /* === 5. CÁC CLASS COMPONENT ĐẶC TRƯNG === */
+  .footnote {
+    @apply text-[13px] font-normal;
+    color: var(--label-secondary);
+    letter-spacing: -0.006em;
+  }
+
+  .caption {
+    @apply text-[13px] md:text-[14px] font-normal;
+    color: var(--label-secondary);
+    line-height: 1.38462;
+  }
+
+  .apple-glass {
+    @apply backdrop-blur-xl shadow-sm rounded-2xl;
+    background-color: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--border-subtle);
+  }
+  .dark .apple-glass {
+    background-color: rgba(28, 28, 30, 0.55);
+    border: 1px solid var(--border-subtle);
+    box-shadow: none;
+  }
+
+  .nav-item {
+    @apply flex items-center px-4 py-3 mt-2 text-[17px] font-medium rounded-xl hover:bg-gray-100/80 focus-visible:bg-gray-100;
+    color: var(--label-secondary);
+  }
+  .nav-item:hover { color: var(--label-primary); }
+  .dark .nav-item { background-color: transparent; }
+  .dark .nav-item:hover { background-color: var(--bg-elevated-secondary); color: var(--label-primary); }
+  .dark .nav-item:focus-visible { background-color: var(--bg-elevated-secondary); }
+
+  .nav-item.router-link-active {
+    @apply bg-white/80 backdrop-blur-md shadow-sm font-semibold;
+    color: var(--system-orange);
+  }
+  .dark .nav-item.router-link-active {
+    background-color: rgba(44, 44, 46, 0.8);
+    @apply backdrop-blur-md shadow-none font-semibold;
+    color: var(--system-orange);
+  }
+
+  /* === 6. HOẠ TIẾT TRỐNG ĐỒNG === */
+  .trong-dong-pattern {
+    background-color: #D4AF37;
+    opacity: 0.08;
+    mask-image: url('/trong-dong-dong-son.png');
+    -webkit-mask-image: url('/trong-dong-dong-son.png');
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center center;
+    -webkit-mask-position: center center;
+    mask-size: 85vh;
+    -webkit-mask-size: 85vh;
+  }
+
+  /* === 7. APPLE COMPONENT BUTTONS === */
+  .apple-btn-icon {
+    @apply w-8 h-8 rounded-full bg-[#007AFF]/10 hover:text-white transition-all duration-200 active:scale-90 flex items-center justify-center outline-none;
+    color: var(--system-blue);
+  }
+  .apple-btn-icon:hover { background-color: var(--system-blue); }
+  .dark .apple-btn-icon { background-color: rgba(10, 132, 255, 0.15); hover:text-white; }
+  .dark .apple-btn-icon:hover { background-color: var(--system-blue); }
+
+  /* === 9. VĂN HOÁ VIỆT NAM CARDS === */
+  .lacquer-glass {
+    @apply backdrop-blur-2xl shadow-[0_8px_32px_rgba(139,26,26,0.3)] rounded-2xl text-[#F5F5F7];
+    background-color: rgba(139, 26, 26, 0.8);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+  }
+  .dark .lacquer-glass {
+    background-color: rgba(74, 14, 14, 0.8);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    shadow: none;
+  }
+
+  .btn-dong-son-gold {
+    @apply bg-gradient-to-br from-[#F3E5AB] via-[#D4AF37] to-[#AA771C] text-[#1A1514] font-bold rounded-xl shadow-[0_4px_14px_rgba(212,175,55,0.4)] hover:shadow-[0_6px_20px_rgba(212,175,55,0.6)] active:scale-95 transition-all duration-300;
+    border: 1px solid rgba(255, 248, 214, 0.5);
+  }
+
+  .btn-lacquer-red {
+    @apply bg-gradient-to-b from-[#A52A2A] to-[#7A1A1A] text-[#F5F5F7] font-bold rounded-xl shadow-[0_4px_14px_rgba(122,26,26,0.5)] hover:shadow-[0_6px_20px_rgba(122,26,26,0.7)] active:scale-95 transition-all duration-300;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+  }
+
+  /* === 12. ACCESSIBILITY: REDUCED TRANSPARENCY === */
+  @media (prefers-reduced-transparency: reduce) {
+    .apple-glass {
+      background-color: var(--bg-elevated) !important;
+      border: 1px solid var(--separator) !important;
+      backdrop-filter: none !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+    }
+    .dark .apple-glass {
+      background-color: var(--bg-elevated) !important;
+      border: 1px solid var(--separator) !important;
+      backdrop-filter: none !important;
+    }
+    .lacquer-glass {
+      background-color: #8B1A1A !important;
+      backdrop-filter: none !important;
+    }
+    .dark .lacquer-glass {
+      background-color: #4A0E0E !important;
+      backdrop-filter: none !important;
+    }
+  }
+
+  /* ========================================================================= */
+  /* === 14. (MODIFIED) APPLE SF SYMBOLS & ICONOGRAPHY (HIG) === */
+  /* ========================================================================= */
+  .sf-icon, .sf-symbol {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    vertical-align: -0.125em; /* Apple Optical Alignment */
+    width: 1em;
+    height: 1em;
+    line-height: 1;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+  .sf-icon-thin { stroke-width: 1px; }
+  .sf-icon-regular { stroke-width: 1.5px; }
+  .sf-icon-bold { stroke-width: 2.5px; }
+
+  .sf-hierarchical { color: var(--label-primary); }
+  .sf-hierarchical .primary-layer { opacity: 1; }
+  .sf-hierarchical .secondary-layer { opacity: 0.5; }
+  .sf-hierarchical .tertiary-layer { opacity: 0.25; }
+
+  /* SF Symbol Palette Rendering */
+  .sf-palette {
+    --sf-primary: var(--label-primary);
+    --sf-secondary: var(--system-orange);
+    --sf-tertiary: var(--label-tertiary);
+  }
+  .sf-palette .primary-path { fill: var(--sf-primary); }
+  .sf-palette .secondary-path { fill: var(--sf-secondary); }
+  .sf-palette .tertiary-path { fill: var(--sf-tertiary); }
+
+  /* === 15. APPLE IMAGES & SQUIRCLES === */
+  .apple-squircle {
+    border-radius: 22.5%;
+    overflow: hidden;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+  .apple-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.15);
+  }
+  .dark .apple-image,
+  .dark .apple-squircle,
+  .dark img:not(.no-dim) {
+    filter: brightness(0.85) contrast(1.1);
+    transition: filter 0.3s ease;
+  }
+}
+
+@layer utilities {
+  /* === 8. TIỆN ÍCH BỔ SUNG === */
+  .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 10px; }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #D4AF37 0%, #AA771C 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* === 10. MÀU SẮC VIỆT NAM === */
+  .text-viet-gold { color: #D4AF37; }
+  .text-viet-red { color: #8B1A1A; }
+  .shadow-glow-gold { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+  .shadow-glow-red { box-shadow: 0 0 20px rgba(139, 26, 26, 0.4); }
+  .bg-dark-bronze { background: linear-gradient(180deg, #2A201D 0%, #1A1514 100%); }
+  .text-gold-emboss {
+    color: #D4AF37;
+    text-shadow: 1px 1px 0px #AA771C, -1px -1px 0px #F3E5AB;
+  }
+
+  /* ========================================================================= */
+  /* === 16. APPLE LAYOUT & SAFE AREAS (HIG) === */
+  /* ========================================================================= */
+  .apple-readable-content {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .pt-safe { padding-top: env(safe-area-inset-top, 20px); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+  .pl-safe { padding-left: env(safe-area-inset-left, 16px); }
+  .pr-safe { padding-right: env(safe-area-inset-right, 16px); }
+
+  .p-safe {
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    padding-left: env(safe-area-inset-left, 16px);
+    padding-right: env(safe-area-inset-right, 16px);
+  }
+
+  .apple-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: max(var(--space-standard), env(safe-area-inset-left));
+    padding-right: max(var(--space-standard), env(safe-area-inset-right));
+  }
+
+  /* ========================================================================= */
+  /* === 17. (NEW) APPLE PRIVACY (HIG) === */
+  /* ========================================================================= */
+
+  /* Chế độ làm mờ dữ liệu (Blur): Ẩn đi thông tin nhạy cảm, hiện lại khi rê chuột/chạm */
+  .privacy-blur {
+    filter: blur(8px);
+    opacity: 0.6;
+    user-select: none;
+    transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+    cursor: pointer;
+  }
+  .privacy-blur:hover, .privacy-blur:active, .privacy-blur.revealed {
+    filter: blur(0);
+    opacity: 1;
+  }
+
+  /* Chế độ che khuất (Redacted): Thay thế hoàn toàn bằng một dải màu xám */
+  .privacy-redacted {
+    color: transparent !important;
+    background-color: var(--separator);
+    border-radius: 6px;
+    user-select: none;
+    pointer-events: none;
+  }
+}
