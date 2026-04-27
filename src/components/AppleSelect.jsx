@@ -2,8 +2,6 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronsUpDown, Search, Check } from 'lucide-react';
-// 1. IMPORT HOOK ẢO HÓA
-import { useVirtualizer } from '@tanstack/react-virtual';
 
 export default function AppleSelect({
                                         value,
@@ -19,17 +17,13 @@ export default function AppleSelect({
 
     const triggerRef = useRef(null);
     const dropdownRef = useRef(null);
-
-    // 2. TẠO REF CHO VÙNG CHỨA DANH SÁCH CUỘN
-    const scrollContainerRef = useRef(null);
-
     const [dropdownStyle, setDropdownStyle] = useState({});
 
     useEffect(() => {
         if (!isOpen) setSearchQuery('');
     }, [isOpen]);
 
-    // Tọa độ Portal (Đã có từ trước)
+    // Tọa độ Portal
     useEffect(() => {
         if (isOpen) {
             const updatePosition = () => {
@@ -86,17 +80,6 @@ export default function AppleSelect({
         onChange(opt.value);
         setIsOpen(false);
     };
-
-    // =========================================================================
-    // 3. KHỞI TẠO BỘ MÁY ẢO HÓA (VIRTUALIZER)
-    // =========================================================================
-    const rowVirtualizer = useVirtualizer({
-        count: filteredOptions.length, // Tổng số lượng dòng
-        getScrollElement: () => scrollContainerRef.current, // Vùng chứa có thanh cuộn
-        estimateSize: () => 44, // Chiều cao ước tính của mỗi dòng (khoảng 44px)
-        overscan: 5, // Vẽ thêm 5 dòng dự phòng ở trên và dưới để cuộn không bị giật
-    });
-    // =========================================================================
 
     return (
         <div className="w-full text-left relative">
@@ -162,59 +145,39 @@ export default function AppleSelect({
                                     </div>
                                 )}
 
-                                {/* 4. GẮN REF VÀ VẼ ẢO HÓA LÊN DOM */}
-                                <div
-                                    ref={scrollContainerRef}
-                                    className="overflow-y-auto max-h-64 py-1 custom-scrollbar w-full"
-                                >
+                                {/* DANH SÁCH NGUYÊN THỦY: Vứt bỏ ảo hóa, dùng flex-col xếp dọc chuẩn chỉ */}
+                                <div className="overflow-y-auto max-h-64 py-1 custom-scrollbar w-full flex flex-col">
                                     {filteredOptions.length === 0 ? (
                                         <div className="px-3 py-4 text-center text-[12px] font-medium text-[var(--label-secondary)]">
                                             Không tìm thấy kết quả
                                         </div>
                                     ) : (
-                                        // Vùng chứa khổng lồ mô phỏng chiều cao thật của toàn bộ danh sách
-                                        <div
-                                            style={{
-                                                height: `${rowVirtualizer.getTotalSize()}px`,
-                                                width: '100%',
-                                                position: 'relative',
-                                            }}
-                                        >
-                                            {/* Chỉ lấy các items nằm trong khung nhìn để render */}
-                                            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                                                const opt = filteredOptions[virtualRow.index];
-                                                return (
-                                                    <div
-                                                        key={virtualRow.key}
-                                                        onClick={() => selectOption(opt)}
-                                                        className={`absolute top-0 left-0 w-full flex items-center justify-between px-3 py-2 text-[13px] cursor-pointer transition-colors hover:bg-[var(--bg-elevated)] ${
-                                                            value === opt.value ? 'bg-[#D4AF37]/10 text-viet-gold' : 'text-[var(--label-primary)]'
-                                                        }`}
-                                                        style={{
-                                                            height: `${virtualRow.size}px`,
-                                                            transform: `translateY(${virtualRow.start}px)`, // Đẩy vị trí của item xuống đúng tọa độ thực của nó
-                                                        }}
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            {opt.logo && (
-                                                                <img src={opt.logo} alt="logo" className="w-6 h-6 rounded bg-white p-0.5 border border-[var(--border-subtle)] no-dim object-contain" />
-                                                            )}
-                                                            <div className="flex flex-col">
-                                                                <span className={value === opt.value ? 'font-bold' : 'font-medium'}>{opt.label}</span>
-                                                                {opt.subLabel && (
-                                                                    <span className={`text-[10px] font-medium ${value === opt.value ? 'text-viet-gold/70' : 'text-[var(--label-tertiary)]'}`}>
-                                                                        {opt.subLabel}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        {value === opt.value && (
-                                                            <Check className="sf-icon sf-icon-bold w-4 h-4 text-viet-gold" />
+                                        filteredOptions.map((opt, index) => (
+                                            <div
+                                                key={opt.value || index}
+                                                onClick={() => selectOption(opt)}
+                                                className={`flex items-center justify-between px-3 py-2 text-[13px] cursor-pointer transition-colors hover:bg-[var(--bg-elevated)] ${
+                                                    value === opt.value ? 'bg-[#D4AF37]/10 text-viet-gold' : 'text-[var(--label-primary)]'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    {opt.logo && (
+                                                        <img src={opt.logo} alt="logo" className="w-6 h-6 rounded bg-white p-0.5 border border-[var(--border-subtle)] no-dim object-contain" />
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <span className={value === opt.value ? 'font-bold' : 'font-medium'}>{opt.label}</span>
+                                                        {opt.subLabel && (
+                                                            <span className={`text-[10px] font-medium ${value === opt.value ? 'text-viet-gold/70' : 'text-[var(--label-tertiary)]'}`}>
+                                                                {opt.subLabel}
+                                                            </span>
                                                         )}
                                                     </div>
-                                                );
-                                            })}
-                                        </div>
+                                                </div>
+                                                {value === opt.value && (
+                                                    <Check className="sf-icon sf-icon-bold w-4 h-4 text-viet-gold" />
+                                                )}
+                                            </div>
+                                        ))
                                     )}
                                 </div>
                             </motion.div>
