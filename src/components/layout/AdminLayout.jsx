@@ -36,20 +36,22 @@ export default function AdminLayout() {
         }
     };
 
-    // Hàm bấm nguyên thủy, không màu mè
+    // ==========================================
+    // BÀI TEST CLICK
+    // ==========================================
     const closeSidebar = (e) => {
-        if (e && e.cancelable) e.preventDefault();
-
-        alert("ĐÃ BẤM TRÚNG NÚT X!"); // Bật thông báo
-
+        if (e && e.preventDefault) e.preventDefault();
+        alert("THÀNH CÔNG! SAFARI ĐÃ NHẬN LỆNH!"); // Nếu hiện cái này là thắng
         setIsSidebarOpen(false);
     };
-    const openSidebar = () => setIsSidebarOpen(true);
-    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-    const closeOnMobile = () => {
-        if (window.innerWidth < 768) setIsSidebarOpen(false);
+    const openSidebar = (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        setIsSidebarOpen(true);
     };
+
+    const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+    const closeOnMobile = () => { if (window.innerWidth < 768) setIsSidebarOpen(false); };
 
     useEffect(() => {
         const handleResize = () => setIsSidebarOpen(window.innerWidth >= 768);
@@ -67,49 +69,41 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* BẢN VÁ 1: MÀN ĐEN NGUYÊN THỦY
-                - Vứt bỏ Framer Motion
-                - Dùng thẻ div cứng, gắn trực tiếp onClick
-                - Thêm WebkitTapHighlightColor để iOS không bị chớp đen
-            */}
+            {/* BẢN VÁ HẠNG NẶNG IOS: ĐỔI MÀN ĐEN THÀNH THẺ BUTTON */}
             {isSidebarOpen && window.innerWidth < 768 && (
-                <div
+                <button
+                    type="button"
                     onClick={closeSidebar}
-                    className="fixed inset-0 bg-black/60 z-[90] backdrop-blur-sm"
-                    style={{ cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
-                ></div>
+                    className="fixed inset-0 w-full h-full bg-black/60 z-[99990] backdrop-blur-sm cursor-pointer border-none outline-none m-0 p-0 block"
+                    style={{ WebkitTapHighlightColor: 'transparent', WebkitAppearance: 'none' }}
+                ></button>
             )}
 
             {/* SIDEBAR */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
-                    isSidebarOpen
-                        ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
-                        : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[99995] group pb-safe ${
+                    isSidebarOpen ? 'translate-x-0 w-64 shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                {/* BẢN VÁ 2: NÚT X NGUYÊN THỦY
-                    - Bỏ toàn bộ hiệu ứng
-                    - Nằm ngay trong thẻ aside như ảnh bạn chụp
-                    - Nâng z-index lên 9999
-                */}
+                {/* NÚT X ĐÓNG MENU: Gắn z-index 99999 cao nhất hệ mặt trời */}
                 <button
                     onClick={closeSidebar}
-                    className="md:hidden absolute right-4 top-6 p-2 z-[9999] text-[var(--label-secondary)] active:text-[var(--system-red)] outline-none"
+                    type="button"
+                    className="md:hidden absolute right-2 top-4 p-4 z-[99999] text-[var(--label-secondary)] active:text-[var(--system-red)] outline-none bg-transparent border-none cursor-pointer"
                     style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                    <X className="w-7 h-7" />
+                    <X className="w-8 h-8 pointer-events-none" />
                 </button>
 
                 <div className={`flex items-center justify-center px-2 mb-8 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block">
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block relative z-[99998]">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -129,13 +123,13 @@ export default function AdminLayout() {
                         <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
 
-                    {/* BẢN VÁ 3: NÚT 3 GẠCH NGUYÊN THỦY */}
                     <button
                         onClick={openSidebar}
-                        className="p-2 text-[var(--label-primary)] outline-none"
+                        type="button"
+                        className="p-2 text-[var(--label-primary)] outline-none bg-transparent border-none cursor-pointer"
                         style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
-                        <Menu className="w-7 h-7" />
+                        <Menu className="w-7 h-7 pointer-events-none" />
                     </button>
                 </div>
 
@@ -151,7 +145,7 @@ export default function AdminLayout() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Ô Khóa Vàng - Giữ nguyên hiệu ứng Framer Motion vì nó không đụng chạm ai */}
+                        {/* Ô Khóa Vàng */}
                         <AnimatePresence>
                             {isLocked && (
                                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="absolute inset-0 z-50 flex items-center justify-center p-4">
@@ -185,7 +179,7 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `flex items-center w-full px-3 py-3 mb-1.5 rounded-xl transition-colors relative group/item outline-none ${
+                `flex items-center w-full px-3 py-3 mb-1.5 rounded-xl transition-colors relative group/item outline-none cursor-pointer ${
                     isActive
                         ? 'bg-[var(--system-orange)]/20 text-[var(--system-orange)] font-bold'
                         : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
@@ -202,12 +196,6 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             >
                 {label}
             </span>
-
-            {!isOpen && (
-                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
-                    {label}
-                </div>
-            )}
         </NavLink>
     );
 }
