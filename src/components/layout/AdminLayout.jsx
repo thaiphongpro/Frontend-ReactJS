@@ -14,6 +14,9 @@ import logoImg from '../../assets/logo-1.png';
 
 export default function AdminLayout() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+    // BỘ GIÁP CHỐNG GHOST CLICK CỦA IOS
+    const [ignoreClick, setIgnoreClick] = useState(false);
+
     const location = useLocation();
     const { language } = useSettingsStore();
 
@@ -36,25 +39,48 @@ export default function AdminLayout() {
         }
     };
 
-    // ==========================================
-    // BÀI TEST CLICK
-    // ==========================================
+    // =======================================================
+    // THUẬT TOÁN TRIỆT TIÊU GHOST CLICK
+    // =======================================================
     const closeSidebar = (e) => {
         if (e && e.preventDefault) e.preventDefault();
-        alert("THÀNH CÔNG! SAFARI ĐÃ NHẬN LỆNH!"); // Nếu hiện cái này là thắng
-        setIsSidebarOpen(false);
+        if (ignoreClick) return; // Nếu đang bị khóa thì bỏ qua lệnh
+
+        setIsSidebarOpen(false); // Đóng menu
+
+        // Khóa nhận lệnh trong 400ms để triệt tiêu cú click ảo của iOS
+        setIgnoreClick(true);
+        setTimeout(() => setIgnoreClick(false), 400);
     };
 
     const openSidebar = (e) => {
         if (e && e.preventDefault) e.preventDefault();
-        setIsSidebarOpen(true);
+        if (ignoreClick) return;
+
+        setIsSidebarOpen(true); // Mở menu
+
+        setIgnoreClick(true);
+        setTimeout(() => setIgnoreClick(false), 400);
     };
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-    const closeOnMobile = () => { if (window.innerWidth < 768) setIsSidebarOpen(false); };
 
+    const closeOnMobile = () => {
+        if (window.innerWidth < 768) {
+            setIsSidebarOpen(false);
+        }
+    };
+
+    // Fix lỗi Safari tự đóng Menu khi kéo màn hình (thay đổi url bar)
     useEffect(() => {
-        const handleResize = () => setIsSidebarOpen(window.innerWidth >= 768);
+        let lastIsDesktop = window.innerWidth >= 768;
+        const handleResize = () => {
+            const isDesktop = window.innerWidth >= 768;
+            if (isDesktop !== lastIsDesktop) {
+                setIsSidebarOpen(isDesktop);
+                lastIsDesktop = isDesktop;
+            }
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -69,41 +95,42 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* BẢN VÁ HẠNG NẶNG IOS: ĐỔI MÀN ĐEN THÀNH THẺ BUTTON */}
-            {isSidebarOpen && window.innerWidth < 768 && (
-                <button
-                    type="button"
-                    onClick={closeSidebar}
-                    className="fixed inset-0 w-full h-full bg-black/60 z-[99990] backdrop-blur-sm cursor-pointer border-none outline-none m-0 p-0 block"
-                    style={{ WebkitTapHighlightColor: 'transparent', WebkitAppearance: 'none' }}
-                ></button>
-            )}
+            {/* Màn đen mờ khi mở Menu trên Mobile */}
+            <AnimatePresence>
+                {isSidebarOpen && window.innerWidth < 768 && (
+                    <motion.div
+                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+                        onClick={closeSidebar}
+                        className="fixed inset-0 bg-black/50 dark:bg-black/70 z-[90] backdrop-blur-sm cursor-pointer"
+                    ></motion.div>
+                )}
+            </AnimatePresence>
 
             {/* SIDEBAR */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[99995] group pb-safe ${
-                    isSidebarOpen ? 'translate-x-0 w-64 shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
+                    isSidebarOpen
+                        ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
+                        : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
                 }`}
             >
                 <button onClick={toggleSidebar} className="hidden md:flex absolute -right-3.5 top-10 apple-btn-icon shadow-sm bg-[var(--bg-elevated)] border border-[var(--separator)] z-50 text-[var(--label-primary)] hover:text-[var(--system-orange)]">
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                {/* NÚT X ĐÓNG MENU: Gắn z-index 99999 cao nhất hệ mặt trời */}
+                {/* NÚT X ĐÓNG MENU CỦA IOS */}
                 <button
                     onClick={closeSidebar}
-                    type="button"
-                    className="md:hidden absolute right-2 top-4 p-4 z-[99999] text-[var(--label-secondary)] active:text-[var(--system-red)] outline-none bg-transparent border-none cursor-pointer"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
+                    className="md:hidden absolute right-4 top-6 p-2 z-50 text-[var(--label-secondary)] active:text-[var(--system-red)] outline-none cursor-pointer"
                 >
-                    <X className="w-8 h-8 pointer-events-none" />
+                    <X className="w-7 h-7" />
                 </button>
 
                 <div className={`flex items-center justify-center px-2 mb-8 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block relative z-[99998]">
+                <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
                     <NavItem to="/categories" icon={Tag} label={getMenuLabel('categories')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -123,13 +150,12 @@ export default function AdminLayout() {
                         <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
 
+                    {/* NÚT 3 GẠCH MỞ MENU CỦA IOS */}
                     <button
                         onClick={openSidebar}
-                        type="button"
-                        className="p-2 text-[var(--label-primary)] outline-none bg-transparent border-none cursor-pointer"
-                        style={{ WebkitTapHighlightColor: 'transparent' }}
+                        className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none cursor-pointer p-2"
                     >
-                        <Menu className="w-7 h-7 pointer-events-none" />
+                        <Menu className="sf-icon sf-icon-bold w-6 h-6" />
                     </button>
                 </div>
 
@@ -145,7 +171,6 @@ export default function AdminLayout() {
                             </AnimatePresence>
                         </div>
 
-                        {/* Ô Khóa Vàng */}
                         <AnimatePresence>
                             {isLocked && (
                                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="absolute inset-0 z-50 flex items-center justify-center p-4">
@@ -185,17 +210,20 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
                         : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
                 }`
             }
-            style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-            <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0 pointer-events-none" />
-
+            <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0" />
             <span
-                className={`transition-opacity duration-200 whitespace-nowrap tracking-wide text-[15px] pointer-events-none ${
+                className={`transition-opacity duration-200 whitespace-nowrap tracking-wide text-[15px] ${
                     isOpen ? 'opacity-100 ml-3.5 block' : 'opacity-0 w-0 hidden md:block'
                 }`}
             >
                 {label}
             </span>
+            {!isOpen && (
+                <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
+                    {label}
+                </div>
+            )}
         </NavLink>
     );
 }
