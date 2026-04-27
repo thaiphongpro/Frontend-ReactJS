@@ -37,7 +37,13 @@ export default function AdminLayout() {
     };
 
     // Hàm bấm nguyên thủy, không màu mè
-    const closeSidebar = () => setIsSidebarOpen(false);
+    const closeSidebar = (e) => {
+        if (e && e.cancelable) e.preventDefault();
+
+        alert("ĐÃ BẤM TRÚNG NÚT X!"); // Bật thông báo
+
+        setIsSidebarOpen(false);
+    };
     const openSidebar = () => setIsSidebarOpen(true);
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
