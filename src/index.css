@@ -238,8 +238,8 @@
   .trong-dong-pattern {
     background-color: #D4AF37;
     opacity: 0.08;
-    mask-image: url('/trong-dong-dong-son.png');
-    -webkit-mask-image: url('/trong-dong-dong-son.png');
+    mask-image: url('/public/trong-dong-dong-son.png');
+    -webkit-mask-image: url('/public/trong-dong-dong-son.png');
     mask-repeat: no-repeat;
     -webkit-mask-repeat: no-repeat;
     mask-position: center center;

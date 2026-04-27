@@ -36,23 +36,9 @@ export default function AdminLayout() {
         }
     };
 
-    // ========================================================
-    // BẢN VÁ: Hàm đóng/mở Menu bọc thép chống liệt cảm ứng trên iOS
-    // ========================================================
-    const handleCloseSidebar = (e) => {
-        if (e && e.stopPropagation) {
-            e.stopPropagation(); // Ép Safari không được nuốt sự kiện chạm
-        }
-        setIsSidebarOpen(false);
-    };
-
-    const handleOpenSidebar = (e) => {
-        if (e && e.stopPropagation) {
-            e.stopPropagation();
-        }
-        setIsSidebarOpen(true);
-    };
-
+    // Hàm bấm nguyên thủy, không màu mè
+    const closeSidebar = () => setIsSidebarOpen(false);
+    const openSidebar = () => setIsSidebarOpen(true);
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const closeOnMobile = () => {
@@ -75,22 +61,22 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* Màn đen mờ khi mở Menu trên Mobile - Đã thêm onTouchStart */}
-            <AnimatePresence>
-                {isSidebarOpen && window.innerWidth < 768 && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-                        onClick={handleCloseSidebar}
-                        onTouchStart={handleCloseSidebar} // Bắt chạm tức thì trên iOS
-                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm cursor-pointer"
-                        style={{ touchAction: 'none' }} // Chống cuộn nền gây lỗi chạm
-                    ></motion.div>
-                )}
-            </AnimatePresence>
+            {/* BẢN VÁ 1: MÀN ĐEN NGUYÊN THỦY
+                - Vứt bỏ Framer Motion
+                - Dùng thẻ div cứng, gắn trực tiếp onClick
+                - Thêm WebkitTapHighlightColor để iOS không bị chớp đen
+            */}
+            {isSidebarOpen && window.innerWidth < 768 && (
+                <div
+                    onClick={closeSidebar}
+                    className="fixed inset-0 bg-black/60 z-[90] backdrop-blur-sm"
+                    style={{ cursor: 'pointer', WebkitTapHighlightColor: 'transparent' }}
+                ></div>
+            )}
 
             {/* SIDEBAR */}
             <aside
-                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
+                className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-transform duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
                         ? 'translate-x-0 w-64 shadow-2xl md:shadow-none'
                         : '-translate-x-full md:translate-x-0 w-64 md:w-[88px]'
@@ -100,14 +86,17 @@ export default function AdminLayout() {
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                {/* NÚT X ĐÓNG MENU: Đã thêm onTouchStart và nâng z-index lên cao nhất */}
+                {/* BẢN VÁ 2: NÚT X NGUYÊN THỦY
+                    - Bỏ toàn bộ hiệu ứng
+                    - Nằm ngay trong thẻ aside như ảnh bạn chụp
+                    - Nâng z-index lên 9999
+                */}
                 <button
-                    onClick={handleCloseSidebar}
-                    onTouchStart={handleCloseSidebar} // Bắt chạm tức thì trên iOS
-                    type="button"
-                    className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-transparent text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-[999] cursor-pointer"
+                    onClick={closeSidebar}
+                    className="md:hidden absolute right-4 top-6 p-2 z-[9999] text-[var(--label-secondary)] active:text-[var(--system-red)] outline-none"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                    <X className="sf-icon sf-icon-bold w-6 h-6 pointer-events-none" />
+                    <X className="w-7 h-7" />
                 </button>
 
                 <div className={`flex items-center justify-center px-2 mb-8 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
@@ -133,14 +122,14 @@ export default function AdminLayout() {
                     <div className="flex items-center h-10">
                         <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
-                    {/* NÚT 3 GẠCH: Đã thêm onTouchStart */}
+
+                    {/* BẢN VÁ 3: NÚT 3 GẠCH NGUYÊN THỦY */}
                     <button
-                        onClick={handleOpenSidebar}
-                        onTouchStart={handleOpenSidebar}
-                        type="button"
-                        className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none cursor-pointer"
+                        onClick={openSidebar}
+                        className="p-2 text-[var(--label-primary)] outline-none"
+                        style={{ WebkitTapHighlightColor: 'transparent' }}
                     >
-                        <Menu className="sf-icon sf-icon-bold w-6 h-6 pointer-events-none" />
+                        <Menu className="w-7 h-7" />
                     </button>
                 </div>
 
@@ -156,6 +145,7 @@ export default function AdminLayout() {
                             </AnimatePresence>
                         </div>
 
+                        {/* Ô Khóa Vàng - Giữ nguyên hiệu ứng Framer Motion vì nó không đụng chạm ai */}
                         <AnimatePresence>
                             {isLocked && (
                                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 10 }} transition={{ type: "spring", stiffness: 300, damping: 25 }} className="absolute inset-0 z-50 flex items-center justify-center p-4">
@@ -189,12 +179,13 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
             onClick={onClick}
             end={exact}
             className={({ isActive }) =>
-                `flex items-center w-full px-3 py-3 mb-1.5 rounded-xl transition-colors relative group/item ${
+                `flex items-center w-full px-3 py-3 mb-1.5 rounded-xl transition-colors relative group/item outline-none ${
                     isActive
                         ? 'bg-[var(--system-orange)]/20 text-[var(--system-orange)] font-bold'
                         : 'text-[var(--label-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--label-primary)] font-medium'
                 }`
             }
+            style={{ WebkitTapHighlightColor: 'transparent' }}
         >
             <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0 pointer-events-none" />
 
