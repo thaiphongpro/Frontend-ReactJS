@@ -53,8 +53,8 @@ export default function App() {
             <PageTitleUpdater />
             <Suspense fallback={<LoadingScreen />}>
                 <Routes>
+                    <Route path="/" element={<Home />} />
                     <Route element={<AdminLayout />}>
-                        <Route path="/" element={<Home />} />
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/categories" element={<Categories />} />
                         <Route path="/revenue" element={<Revenue />} />
