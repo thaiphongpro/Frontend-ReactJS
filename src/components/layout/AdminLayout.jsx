@@ -36,6 +36,23 @@ export default function AdminLayout() {
         }
     };
 
+    // ========================================================
+    // BẢN VÁ: Hàm đóng/mở Menu bọc thép chống liệt cảm ứng trên iOS
+    // ========================================================
+    const handleCloseSidebar = (e) => {
+        if (e && e.stopPropagation) {
+            e.stopPropagation(); // Ép Safari không được nuốt sự kiện chạm
+        }
+        setIsSidebarOpen(false);
+    };
+
+    const handleOpenSidebar = (e) => {
+        if (e && e.stopPropagation) {
+            e.stopPropagation();
+        }
+        setIsSidebarOpen(true);
+    };
+
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const closeOnMobile = () => {
@@ -58,18 +75,20 @@ export default function AdminLayout() {
         <div className="flex min-h-screen bg-transparent transition-colors duration-300 selection:bg-[var(--system-orange)]/20 overflow-x-hidden">
             <div className="fixed inset-0 z-0 pointer-events-none trong-dong-pattern"></div>
 
-            {/* Màn đen mờ khi mở Menu trên Mobile */}
+            {/* Màn đen mờ khi mở Menu trên Mobile - Đã thêm onTouchStart */}
             <AnimatePresence>
                 {isSidebarOpen && window.innerWidth < 768 && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-                        onClick={() => setIsSidebarOpen(false)}
-                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm"
+                        onClick={handleCloseSidebar}
+                        onTouchStart={handleCloseSidebar} // Bắt chạm tức thì trên iOS
+                        className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[90] backdrop-blur-sm cursor-pointer"
+                        style={{ touchAction: 'none' }} // Chống cuộn nền gây lỗi chạm
                     ></motion.div>
                 )}
             </AnimatePresence>
 
-            {/* SIDEBAR: Đã khôi phục y hệt bản Vue. Luôn rộng 256px (w-64) trên Mobile. */}
+            {/* SIDEBAR */}
             <aside
                 className={`fixed inset-y-0 left-0 apple-glass !rounded-l-none !border-y-0 !border-l-0 transition-all duration-300 flex flex-col py-6 px-4 z-[100] group pb-safe ${
                     isSidebarOpen
@@ -81,15 +100,20 @@ export default function AdminLayout() {
                     {isSidebarOpen ? <ChevronLeft className="sf-icon sf-icon-bold w-4 h-4" /> : <ChevronRight className="sf-icon sf-icon-bold w-4 h-4" />}
                 </button>
 
-                <button onClick={() => setIsSidebarOpen(false)} className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-transparent text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-50">
-                    <X className="sf-icon sf-icon-bold w-6 h-6" />
+                {/* NÚT X ĐÓNG MENU: Đã thêm onTouchStart và nâng z-index lên cao nhất */}
+                <button
+                    onClick={handleCloseSidebar}
+                    onTouchStart={handleCloseSidebar} // Bắt chạm tức thì trên iOS
+                    type="button"
+                    className="md:hidden absolute right-4 top-6 apple-btn-icon !bg-transparent text-[var(--label-secondary)] hover:!text-[var(--system-red)] z-[999] cursor-pointer"
+                >
+                    <X className="sf-icon sf-icon-bold w-6 h-6 pointer-events-none" />
                 </button>
 
                 <div className={`flex items-center justify-center px-2 mb-8 pt-safe overflow-hidden transition-all duration-300 ${isSidebarOpen ? 'h-20' : 'h-14'}`}>
                     <div className={`logo-custom transition-all duration-300 bg-contain bg-center bg-no-repeat ${isSidebarOpen ? 'w-44 h-full' : 'w-12 h-12'}`} style={{ backgroundImage: `url(${logoImg})` }}></div>
                 </div>
 
-                {/* THỦ PHẠM ĐÃ BỊ XÓA: Dùng thẻ <nav> y hệt file Vue, KHÔNG DÙNG flex items-center ở đây */}
                 <nav className="flex-1 space-y-1.5 mt-2 overflow-y-auto custom-scrollbar pr-1 w-full block">
                     <NavItem to="/" icon={Home} label={getMenuLabel('home')} isOpen={isSidebarOpen} onClick={closeOnMobile} exact />
                     <NavItem to="/dashboard" icon={LayoutGrid} label={getMenuLabel('overview')} isOpen={isSidebarOpen} onClick={closeOnMobile} />
@@ -109,8 +133,14 @@ export default function AdminLayout() {
                     <div className="flex items-center h-10">
                         <div className="logo-custom w-32 h-full bg-contain bg-center bg-no-repeat" style={{ backgroundImage: `url(${logoImg})` }}></div>
                     </div>
-                    <button onClick={() => setIsSidebarOpen(true)} className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none">
-                        <Menu className="sf-icon sf-icon-bold w-6 h-6" />
+                    {/* NÚT 3 GẠCH: Đã thêm onTouchStart */}
+                    <button
+                        onClick={handleOpenSidebar}
+                        onTouchStart={handleOpenSidebar}
+                        type="button"
+                        className="apple-btn-icon !bg-transparent text-[var(--label-primary)] outline-none cursor-pointer"
+                    >
+                        <Menu className="sf-icon sf-icon-bold w-6 h-6 pointer-events-none" />
                     </button>
                 </div>
 
@@ -152,7 +182,6 @@ export default function AdminLayout() {
     );
 }
 
-// KHÔI PHỤC Y HỆT LỚP VUE: Đảm bảo nền sáng full viền, chữ không bị mất
 function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
     return (
         <NavLink
@@ -167,18 +196,16 @@ function NavItem({ to, icon: Icon, label, isOpen, onClick, exact }) {
                 }`
             }
         >
-            <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0" />
+            <Icon className="sf-icon sf-icon-regular w-6 h-6 shrink-0 pointer-events-none" />
 
-            {/* Logic y hệt bản Vue cũ: Chữ hiện rõ nét khi mở */}
             <span
-                className={`transition-opacity duration-200 whitespace-nowrap tracking-wide text-[15px] ${
+                className={`transition-opacity duration-200 whitespace-nowrap tracking-wide text-[15px] pointer-events-none ${
                     isOpen ? 'opacity-100 ml-3.5 block' : 'opacity-0 w-0 hidden md:block'
                 }`}
             >
                 {label}
             </span>
 
-            {/* Tooltip khi đóng Sidebar trên Desktop */}
             {!isOpen && (
                 <div className="hidden md:block absolute left-14 px-3 py-1.5 bg-[var(--label-primary)] text-[var(--bg-base)] text-[12px] font-bold rounded-lg opacity-0 group-hover/item:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 shadow-xl">
                     {label}
