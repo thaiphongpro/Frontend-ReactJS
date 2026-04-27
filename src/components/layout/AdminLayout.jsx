@@ -13,7 +13,9 @@ import { useSettingsStore } from '../../store/useSettingsStore.js';
 import logoImg from '../../assets/logo-1.png';
 
 export default function AdminLayout() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+    // 1. SỬA CHỖ NÀY: Ép đóng menu lúc đầu để chống iOS tự động bung
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     const location = useLocation();
     const { language } = useSettingsStore();
 
@@ -52,6 +54,10 @@ export default function AdminLayout() {
             if (window.innerWidth >= 768) setIsSidebarOpen(true);
             else setIsSidebarOpen(false);
         };
+
+        // Gọi 1 lần lúc vừa load web xong để mở menu cho màn hình máy tính
+        handleResize();
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -136,6 +142,11 @@ export default function AdminLayout() {
 
                 <div className="p-4 md:p-8 pb-safe flex-1 flex flex-col relative w-full overflow-x-hidden">
                     <Header />
+
+                    {/* 2. SỬA CHỖ NÀY: TEM KIỂM ĐỊNH PHIÊN BẢN */}
+                    <div className="bg-red-500 text-white text-center font-bold p-3 my-2 rounded-xl z-[999999] shadow-lg animate-pulse border-2 border-white">
+                        NẾU THẤY DÒNG NÀY LÀ CODE MỚI NHẤT ĐÃ ĐƯỢC CẬP NHẬT!
+                    </div>
 
                     <div className="flex-1 relative w-full mt-4 md:mt-0">
                         <div className={`h-full transition-all duration-700 ease-in-out ${isLocked ? 'blur-[10px] pointer-events-none select-none opacity-30 grayscale-[30%]' : 'blur-0 opacity-100'}`}>
